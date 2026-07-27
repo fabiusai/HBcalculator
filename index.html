@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HandBrake Web Setup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Stili personalizzati per lo slider */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            margin-top: -8px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #4b5563;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-6 font-sans">
+
+    <div class="max-w-4xl mx-auto bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
+        <!-- Header -->
+        <div class="bg-gray-900 p-6 border-b border-gray-700">
+            <h1 class="text-2xl font-bold text-blue-400">HandBrake Setup Assistant</h1>
+            <p class="text-sm text-gray-400 mt-1">Definisci i settaggi di compressione in base al file di origine e all'hardware, esporta il preset JSON.</p>
+        </div>
+
+        <div class="p-6 space-y-8">
+            
+            <!-- 1. Input File -->
+            <section>
+                <h2 class="text-lg font-semibold mb-3 flex items-center text-gray-200">
+                    <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">1</span> File Video Originale
+                </h2>
+                <div id="dropzone" class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-gray-700 transition relative">
+                    <input type="file" id="fileInput" accept="video/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                    <div id="dropText">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <p class="text-gray-300 font-medium">Trascina qui il file o clicca per sfogliare</p>
+                        <p class="text-xs text-gray-500 mt-1">L'analisi avviene offline nel browser (Supporta MKV, MP4, MOV)</p>
+                    </div>
+                    
+                    <!-- Dati file nascosti fino al caricamento -->
+                    <div id="fileData" class="hidden text-left bg-gray-900 p-4 rounded mt-4 border border-gray-700">
+                        <p class="font-mono text-sm text-blue-400 mb-2 truncate" id="fileName">-</p>
+                        <div class="grid grid-cols-3 gap-4 text-sm">
+                            <div><span class="text-gray-500">Risoluzione:</span> <span id="fileRes" class="font-semibold text-gray-200"></span></div>
+                            <div><span class="text-gray-500">Dimensione:</span> <span id="fileSize" class="font-semibold text-gray-200"></span></div>
+                            <div><span class="text-gray-500">Durata:</span> <span id="fileDuration" class="font-semibold text-gray-200"></span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. Hardware & Obiettivo -->
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h2 class="text-lg font-semibold mb-3 flex items-center text-gray-200">
+                        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">2</span> Hardware di Codifica
+                    </h2>
+                    <select id="hardwareSelect" class="w-full bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
+                        <option value="mac_hw">Mac Apple Silicon (Accelerazione VideoToolbox)</option>
+                        <option value="mac_sw">Mac Apple Silicon (CPU x265 - Lento ma qualitativo)</option>
+                        <option value="pc_nvenc">PC Windows (Nvidia NVENC)</option>
+                        <option value="pc_sw">PC Windows / Linux (CPU x265)</option>
+                    </select>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold mb-3 flex items-center text-gray-200">
+                        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">3</span> Destinazione d'Uso
+                    </h2>
+                    <select id="targetSelect" class="w-full bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
+                        <option value="nas">Streaming NAS (Plex / TV) - Ottimo bilanciamento</option>
+                        <option value="archive">Archiviazione fredda - Massima compressione</option>
+                        <option value="editing">Conservazione Master - Qualità visivamente lossless</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- 3. Qualità / Dimensione (Slider) -->
+            <section>
+                <h2 class="text-lg font-semibold mb-3 flex items-center text-gray-200">
+                    <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">4</span> Regolazione Qualità (RF)
+                </h2>
+                <div class="bg-gray-900 p-6 rounded-lg border border-gray-700">
+                    
+                    <!-- Warning / Status Badge -->
+                    <div id="qualityAlert" class="mb-6 p-3 rounded-md text-sm flex items-center bg-green-900/30 text-green-400 border border-green-800">
+                        Ottimo bilanciamento tra qualità per schermi grandi e peso.
+                    </div>
+
+                    <!-- Slider -->
+                    <div class="flex items-center justify-between text-sm text-gray-400 mb-2">
+                        <span>Massima Compressione (RF 30)</span>
+                        <span class="font-bold text-white bg-blue-600 px-3 py-1 rounded-full text-md" id="rfValueLabel">RF 22</span>
+                        <span>Massima Qualità (RF 16)</span>
+                    </div>
+                    <input type="range" id="rfSlider" min="16" max="30" step="1" value="22" class="w-full h-2 rounded-lg appearance-none cursor-pointer">
+                    
+                    <!-- Stime -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+                        <div class="bg-gray-800 p-4 rounded border border-gray-700 text-center">
+                            <p class="text-xs text-gray-400 uppercase tracking-wide">Dimensione Stimata</p>
+                            <p class="text-xl font-bold text-white mt-1" id="estSize">-- MB</p>
+                        </div>
+                        <div class="bg-gray-800 p-4 rounded border border-gray-700 text-center">
+                            <p class="text-xs text-gray-400 uppercase tracking-wide">Risparmio Spazio</p>
+                            <p class="text-xl font-bold text-green-400 mt-1" id="estSavings">-- %</p>
+                        </div>
+                        <div class="bg-gray-800 p-4 rounded border border-gray-700 text-center">
+                            <p class="text-xs text-gray-400 uppercase tracking-wide">Tempo Stimato</p>
+                            <p class="text-xl font-bold text-yellow-400 mt-1" id="estTime">-- min</p>
+                        </div>
+                        <div class="bg-gray-800 p-4 rounded border border-gray-700 text-center">
+                            <p class="text-xs text-gray-400 uppercase tracking-wide">Codec Suggerito</p>
+                            <p class="text-xl font-bold text-blue-400 mt-1" id="estCodec">H.265</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. Export -->
+            <section class="text-center pt-4">
+                <button id="downloadBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition transform hover:scale-105 flex items-center justify-center mx-auto opacity-50 cursor-not-allowed" disabled>
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Scarica Preset JSON per HandBrake
+                </button>
+                <p class="text-xs text-gray-500 mt-3">Carica un video per abilitare il download del preset generato.</p>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Logic JS -->
+    <script>
+        // Stato dell'applicazione
+        const state = {
+            fileLoaded: false,
+            originalSizeMB: 0,
+            durationSec: 0,
+            width: 0,
+            height: 0,
+            rf: 22,
+            fps: 24, // Stimato per i calcoli se non rilevato
+            hardware: 'mac_hw',
+            target: 'nas'
+        };
+
+        // Elementi DOM
+        const fileInput = document.getElementById('fileInput');
+        const dropzone = document.getElementById('dropzone');
+        const rfSlider = document.getElementById('rfSlider');
+        const hardwareSelect = document.getElementById('hardwareSelect');
+        const targetSelect = document.getElementById('targetSelect');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // Formattazione bytes in MB/GB
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        // Gestione caricamento file tramite API nativa HTML5 (Video Object)
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById('dropText').classList.add('hidden');
+            document.getElementById('fileData').classList.remove('hidden');
+            document.getElementById('fileName').textContent = file.name;
+
+            state.originalSizeMB = file.size / (1024 * 1024);
+            document.getElementById('fileSize').textContent = formatBytes(file.size);
+
+            // Creazione URL temporaneo per leggere i metadata video nativamente
+            const videoURL = URL.createObjectURL(file);
+            const tempVideo = document.createElement('video');
+            
+            tempVideo.addEventListener('loadedmetadata', function() {
+                state.durationSec = tempVideo.duration;
+                state.width = tempVideo.videoWidth;
+                state.height = tempVideo.videoHeight;
+                
+                // Formatta durata
+                const mins = Math.floor(state.durationSec / 60);
+                const secs = Math.floor(state.durationSec % 60);
+                document.getElementById('fileDuration').textContent = `${mins}m ${secs}s`;
+                document.getElementById('fileRes').textContent = `${state.width}x${state.height}`;
+
+                state.fileLoaded = true;
+                URL.revokeObjectURL(videoURL); // Pulisce la memoria
+                
+                // Abilita pulsante e aggiorna stime
+                downloadBtn.disabled = false;
+                downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                document.querySelector('p.text-xs.text-gray-500.mt-3').textContent = "Importa questo file in HandBrake dalla sezione Presets -> Import from file.";
+                
+                updateEstimates();
+            });
+
+            tempVideo.src = videoURL;
+        });
+
+        // Ascoltatori Input per Hardware, Target e Slider
+        hardwareSelect.addEventListener('change', (e) => { state.hardware = e.target.value; updateEstimates(); });
+        targetSelect.addEventListener('change', (e) => { 
+            state.target = e.target.value;
+            // Preset consigliato automatico quando cambia destinazione
+            if(state.target === 'nas') rfSlider.value = 22;
+            if(state.target === 'archive') rfSlider.value = 25;
+            if(state.target === 'editing') rfSlider.value = 18;
+            updateEstimates(); 
+        });
+
+        rfSlider.addEventListener('input', (e) => {
+            // Invertiamo logicamente la vista (HandBrake: più basso = qualità più alta)
+            state.rf = parseInt(e.target.value);
+            document.getElementById('rfValueLabel').textContent = `RF ${state.rf}`;
+            updateEstimates();
+        });
+
+        // Motore di stima
+        function updateEstimates() {
+            if (!state.fileLoaded) return;
+            state.rf = parseInt(rfSlider.value);
+
+            // 1. Calcolo Dimensioni (Curva stimata: RF 22 ~ 35% del file originale non compresso H264)
+            // Più è alto l'RF, più scende il moltiplicatore.
+            // RF 16 = 80%, RF 22 = 35%, RF 30 = 10%
+            const baseFactor = 0.80; // per RF 16
+            const reductionPerStep = 0.05; // per ogni punto RF
+            
+            let compressionFactor = baseFactor - ((state.rf - 16) * reductionPerStep);
+            if (compressionFactor < 0.05) compressionFactor = 0.05; // Limite minimo 5%
+            
+            const estimatedMB = state.originalSizeMB * compressionFactor;
+            document.getElementById('estSize').textContent = estimatedMB > 1000 ? `${(estimatedMB/1024).toFixed(2)} GB` : `${estimatedMB.toFixed(0)} MB`;
+            
+            const savings = 100 - (compressionFactor * 100);
+            document.getElementById('estSavings').textContent = `- ${savings.toFixed(0)} %`;
+
+            // 2. Calcolo Tempi
+            // Stimiamo i frame totali (Assumiamo media 30fps per semplificare se il file non è Elgato)
+            const is4k = state.width > 1920;
+            const totalFrames = state.durationSec * 30; 
+            
+            let hwFps = 100; // default hw
+            if (state.hardware === 'mac_hw') hwFps = is4k ? 65 : 180;
+            if (state.hardware === 'mac_sw') hwFps = is4k ? 15 : 45;
+            if (state.hardware === 'pc_nvenc') hwFps = is4k ? 90 : 250;
+            if (state.hardware === 'pc_sw') hwFps = is4k ? 12 : 35;
+
+            const timeSeconds = totalFrames / hwFps;
+            document.getElementById('estTime').textContent = `~ ${Math.ceil(timeSeconds / 60)} min`;
+
+            // Codec setup
+            let encoderName = state.hardware.includes('hw') || state.hardware.includes('nvenc') ? 'H.265 (Hardware)' : 'H.265 (CPU x265)';
+            document.getElementById('estCodec').textContent = encoderName;
+
+            // 3. Sistema Avvisi (Alerts)
+            const alertBox = document.getElementById('qualityAlert');
+            if (state.rf > 26 && !is4k) {
+                alertBox.className = "mb-6 p-3 rounded-md text-sm flex items-center bg-red-900/30 text-red-400 border border-red-800";
+                alertBox.innerHTML = "⚠️ <b>Attenzione:</b> Qualità visiva a rischio. Possibili artefatti nelle zone scure (banding) e perdita di grana su schermi grandi.";
+            } else if (state.rf < 19) {
+                alertBox.className = "mb-6 p-3 rounded-md text-sm flex items-center bg-yellow-900/30 text-yellow-400 border border-yellow-800";
+                alertBox.innerHTML = "⚠️ <b>Inefficienza:</b> Peso file elevato. A questi valori il guadagno visivo rispetto a RF 21-22 è impercettibile.";
+            } else {
+                alertBox.className = "mb-6 p-3 rounded-md text-sm flex items-center bg-green-900/30 text-green-400 border border-green-800";
+                alertBox.innerHTML = "✅ <b>Sweet Spot:</b> Ottimo bilanciamento tra mantenimento dei dettagli e riduzione dello spazio.";
+            }
+        }
+
+        // Generazione JSON HandBrake
+        downloadBtn.addEventListener('click', () => {
+            if (!state.fileLoaded) return;
+
+            // Mappatura encoder HandBrake in base all'hardware
+            let hbEncoder = "x265";
+            if (state.hardware === 'mac_hw') hbEncoder = "vt_h265";
+            if (state.hardware === 'pc_nvenc') hbEncoder = "nvenc_h265";
+            if (state.hardware === 'mac_sw' || state.hardware === 'pc_sw') hbEncoder = "x265";
+
+            // Struttura minima Preset JSON per HandBrake V50 (versione corrente)
+            const presetJSON = {
+                "PresetList": [
+                    {
+                        "PresetName": `WebApp - NAS (${hbEncoder}) RF${state.rf}`,
+                        "Description": "Generato tramite WebApp. Ottimizzato per bilanciamento e archiviazione.",
+                        "Container": "av_mkv",
+                        "VideoEncoder": hbEncoder,
+                        "VideoQualityType": 2, // 2 = Constant Quality
+                        "VideoQualitySlider": state.rf,
+                        "VideoFramerate": "auto",
+                        "VideoFramerateMode": "vfr", // Variable framerate per evitare drop
+                        "VideoPreset": state.hardware.includes('sw') ? "slow" : "speed",
+                        "PictureAutoCrop": true,
+                        "PictureKeepRatio": true,
+                        "AudioList": [
+                            {
+                                // Passthrough audio primario se possibile, altrimenti fallback
+                                "AudioEncoder": "copy", 
+                                "AudioMixdown": "stereo",
+                                "AudioBitrate": 160
+                            }
+                        ]
+                    }
+                ],
+                "VersionMajor": 50,
+                "VersionMicro": 0,
+                "VersionMinor": 0
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(presetJSON, null, 4));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", `HandBrake_WebPreset_RF${state.rf}.json`);
+            document.body.appendChild(downloadAnchorNode); 
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        });
+    </script>
+</body>
+</html>
