@@ -32,7 +32,7 @@
         
         <div class="bg-gray-900 p-6 border-b border-gray-700">
             <h1 class="text-2xl font-bold text-blue-400">HandBrake Setup Assistant <span class="text-xs bg-gray-700 text-white px-2 py-1 rounded ml-2">Mac Optimized</span></h1>
-            <p class="text-sm text-gray-400 mt-1">Generatore di Preset JSON per architettura Apple Silicon con stime basate su SoC.</p>
+            <p class="text-sm text-gray-400 mt-1">Generatore di Preset JSON con rilevamento intelligente del formato per i canali social.</p>
         </div>
 
         <div class="p-6 space-y-8">
@@ -61,6 +61,15 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Alert Smart Social Detection -->
+                <div id="socialAlert" class="hidden mt-4 p-4 rounded-lg bg-purple-900/30 text-purple-300 border border-purple-800 flex items-start">
+                    <svg class="w-6 h-6 mr-3 text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <div>
+                        <h4 class="font-bold text-purple-400">Modalità Social Automatica Attivata</h4>
+                        <p class="text-sm mt-1">È stato rilevato un formato tipico da piattaforma social (verticale o quadrato). Sono state applicate protezioni anti-degrado cromatico (forzatura BT.709), tracce audio compatibili con le dashboard di pubblicazione e un bitrate RF ideale per sopravvivere alla ricompressione dei server.</p>
+                    </div>
+                </div>
             </section>
 
             <!-- 2. Hardware Mac -->
@@ -71,7 +80,7 @@
                     </h2>
                     <div class="space-y-3">
                         <select id="hardwareSelect" class="w-full bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                            <option value="mac_hw_10">VideoToolbox H.265 (10-bit - Ideale per flussi Log)</option>
+                            <option value="mac_hw_10">VideoToolbox H.265 (10-bit - Ideale per master/Log)</option>
                             <option value="mac_hw_8">VideoToolbox H.265 (8-bit)</option>
                             <option value="mac_sw">CPU x265 (Sconsigliato - Molto Lento)</option>
                         </select>
@@ -94,6 +103,7 @@
                     </h2>
                     <select id="targetSelect" class="w-full h-full max-h-11 bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
                         <option value="nas">Rete Locale / NAS (Bilanciamento ottimale)</option>
+                        <option value="social">Canali Social / App Schedulazione (Ottimizzato)</option>
                         <option value="archive">Archiviazione fredda (Massima compressione)</option>
                         <option value="editing">Conservazione Master (Quasi-lossless)</option>
                     </select>
@@ -118,10 +128,8 @@
                             <select id="audioStrategy" class="w-full bg-gray-800 border border-gray-600 text-sm rounded focus:ring-blue-500 p-2 text-white">
                                 <option value="passthrough_aac">1. Passthrough + Traccia AAC Stereo (128 kbps)</option>
                                 <option value="passthrough_only">2. Solo Passthrough (Bit-perfect)</option>
+                                <option value="social_aac">3. Solo AAC Stereo 128kbps (Ottimizzato Web/Social)</option>
                             </select>
-                            <p class="text-xs text-gray-500 mt-2">
-                                <b>Consiglio:</b> "Solo Passthrough" conserva intatte tracce ad alta fedeltà. Aggiungere la traccia secondaria in AAC a 128 kbps (trasparenza per il parlato) assicura retrocompatibilità.
-                            </p>
                         </div>
 
                         <div class="border-t border-gray-700 pt-4">
@@ -132,9 +140,6 @@
                                     <div class="w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
                                 </label>
                             </div>
-                            <p class="text-xs text-gray-500">
-                                <b>Attenzione:</b> Lascia spento per l'89% dei video moderni (progressivi). Attivarlo inutilmente aggiunge un carico gravoso sulla CPU rallentando l'esportazione.
-                            </p>
                         </div>
 
                         <div class="border-t border-gray-700 pt-4">
@@ -144,16 +149,13 @@
                                 <option value="light">Leggero (Ideale per pellicole e vecchia grana)</option>
                                 <option value="strong">Forte (Video scuri molto rumorosi)</option>
                             </select>
-                            <p class="text-xs text-gray-500 mt-2">
-                                Questo filtro passa dalla CPU abbassando i frame al secondo gestibili dal chip Apple Silicon.
-                            </p>
                         </div>
 
                         <div class="border-t border-gray-700 pt-4">
                             <label class="block text-sm font-medium text-gray-300 mb-1">Spazio Colore (Color Space)</label>
                             <select id="colorSpaceSelect" class="w-full bg-gray-800 border border-gray-600 text-sm rounded focus:ring-blue-500 p-2 text-white">
-                                <option value="auto">Auto / Passthrough (Consigliato)</option>
-                                <option value="bt709">Forza BT.709 (SDR Standard)</option>
+                                <option value="auto">Auto / Passthrough (Consigliato per Master)</option>
+                                <option value="bt709">Forza BT.709 (SDR Standard - Obbligatorio per Social)</option>
                                 <option value="bt2020">Forza BT.2020 (HDR / Wide Color)</option>
                             </select>
                         </div>
@@ -222,6 +224,7 @@
         const fileInput = document.getElementById('fileInput');
         const downloadBtn = document.getElementById('downloadBtn');
         const rfSlider = document.getElementById('rfSlider');
+        const socialAlert = document.getElementById('socialAlert');
 
         function formatBytes(bytes, decimals = 2) {
             if (bytes === 0) return '0 Bytes';
@@ -230,7 +233,7 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
         }
 
-        // 1. Caricamento
+        // 1. Caricamento e Smart Detection
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -252,6 +255,38 @@
                 document.getElementById('fileDuration').textContent = `${Math.floor(state.durationSec / 60)}m ${Math.floor(state.durationSec % 60)}s`;
                 document.getElementById('fileRes').textContent = `${state.width}x${state.height}`;
 
+                // --- SMART SOCIAL DETECTION ---
+                const ratio = state.width / state.height;
+                // Consideriamo formati Social quelli con ratio <= 1 (es. 4:5 caroselli, 9:16 reels, 1:1 quadrato)
+                // Aggiungiamo un piccolissimo margine (1.05) per tolleranza
+                if (ratio <= 1.05) {
+                    state.target = 'social';
+                    document.getElementById('targetSelect').value = 'social';
+                    
+                    // Ottimizzazioni obbligate per i tool di marketing e social
+                    state.colorSpace = 'bt709'; // Evita l'effetto slavato da Log/HDR
+                    document.getElementById('colorSpaceSelect').value = 'bt709';
+                    
+                    state.audioStrategy = 'social_aac'; // Elimina il passthrough non supportato
+                    document.getElementById('audioStrategy').value = 'social_aac';
+                    
+                    state.rf = 20; // Abbassiamo leggermente l'RF per resistere alla ri-compressione web
+                    rfSlider.value = 20;
+                    document.getElementById('rfValueLabel').textContent = `RF 20`;
+                    
+                    socialAlert.classList.remove('hidden');
+                } else {
+                    socialAlert.classList.add('hidden');
+                    // Reset se era attivo prima
+                    if(state.target === 'social') {
+                        document.getElementById('targetSelect').value = 'nas';
+                        state.target = 'nas';
+                        state.rf = 22;
+                        rfSlider.value = 22;
+                        document.getElementById('rfValueLabel').textContent = `RF 22`;
+                    }
+                }
+
                 state.fileLoaded = true;
                 URL.revokeObjectURL(videoURL); 
                 downloadBtn.disabled = false;
@@ -261,16 +296,25 @@
             tempVideo.src = videoURL;
         });
 
-        // 2. Event Listeners
+        // 2. Event Listeners UI
         document.getElementById('hardwareSelect').addEventListener('change', (e) => { state.hardware = e.target.value; updateEstimates(); });
         document.getElementById('chipSelect').addEventListener('change', (e) => { state.chip = e.target.value; updateEstimates(); });
         document.getElementById('ramSelect').addEventListener('change', (e) => { state.ram = e.target.value; updateEstimates(); });
         
         document.getElementById('targetSelect').addEventListener('change', (e) => { 
             state.target = e.target.value;
+            socialAlert.classList.add('hidden'); // Nascondiamo l'alert se l'utente cambia manualmente
+            
             if(state.target === 'nas') rfSlider.value = 22;
             if(state.target === 'archive') rfSlider.value = 26;
             if(state.target === 'editing') rfSlider.value = 18;
+            if(state.target === 'social') {
+                rfSlider.value = 20;
+                document.getElementById('colorSpaceSelect').value = 'bt709';
+                state.colorSpace = 'bt709';
+                document.getElementById('audioStrategy').value = 'social_aac';
+                state.audioStrategy = 'social_aac';
+            }
             updateEstimates(); 
         });
         
@@ -285,10 +329,11 @@
         document.getElementById('denoiseSelect').addEventListener('change', (e) => { state.denoise = e.target.value; updateEstimates(); });
         document.getElementById('colorSpaceSelect').addEventListener('change', (e) => { state.colorSpace = e.target.value; });
 
-        // 3. Stime Specifiche per Apple Silicon
+        // 3. Stime
         function updateEstimates() {
             if (!state.fileLoaded) return;
             state.rf = parseInt(rfSlider.value);
+            document.getElementById('rfValueLabel').textContent = `RF ${state.rf}`;
 
             let compressionFactor = 0.80 - ((state.rf - 16) * 0.05);
             if (compressionFactor < 0.05) compressionFactor = 0.05;
@@ -300,25 +345,16 @@
             document.getElementById('estSize').textContent = estimatedMB > 1000 ? `${(estimatedMB/1024).toFixed(2)} GB` : `${estimatedMB.toFixed(0)} MB`;
             document.getElementById('estSavings').textContent = `- ${(100 - (compressionFactor * 100)).toFixed(0)} %`;
 
-            const is4k = state.width > 1920;
+            const is4k = state.width > 1920 || state.height > 1920;
             const totalFrames = state.durationSec * 30; 
             
-            // Scalabilità base VideoToolbox
             let baseFps = is4k ? 90 : 220; 
-            
-            // Moltiplicatori architettura hardware
             if (state.chip === 'pro') baseFps *= 1.4;
             if (state.chip === 'max') baseFps *= 2.5; 
-            
-            // Impatto banda passante memoria unificata (4K)
             if (state.ram === '8gb' && is4k) baseFps *= 0.75; 
-
-            // Penalità di latenza su x265 nativo
             if (state.hardware === 'mac_sw') baseFps *= 0.15; 
 
             let hwFps = baseFps;
-            
-            // Decurtazioni pipeline CPU (filtri)
             if(state.interlaced) hwFps *= 0.6;
             if(state.denoise === 'light') hwFps *= 0.4;
             if(state.denoise === 'strong') hwFps *= 0.15;
@@ -326,11 +362,16 @@
             const timeSeconds = totalFrames / hwFps;
             document.getElementById('estTime').textContent = `~ ${Math.ceil(timeSeconds / 60)} min`;
 
+            // Aggiorna nome codec. Se il target è social e siamo su hardware 10-bit, 
+            // ma forziamo bt709, il Mac userà comunque l'encoder ma comprimerà lo spazio colore.
             let encoderName = state.hardware.includes('10') ? 'HW 10-bit' : state.hardware.includes('hw') ? 'HW 8-bit' : 'x265 CPU';
             document.getElementById('estCodec').textContent = encoderName;
 
             const alertBox = document.getElementById('qualityAlert');
-            if (state.rf > 26 && !is4k) {
+            if (state.target === 'social') {
+                alertBox.className = "mb-6 p-3 rounded-md text-sm flex items-center bg-purple-900/30 text-purple-400 border border-purple-800";
+                alertBox.innerHTML = "🎯 <b>Ottimizzazione Social attiva:</b> Il file è preparato per mantenere nitidezza dopo la ricompressione del server web.";
+            } else if (state.rf > 26 && !is4k) {
                 alertBox.className = "mb-6 p-3 rounded-md text-sm flex items-center bg-red-900/30 text-red-400 border border-red-800";
                 alertBox.innerHTML = "⚠️ <b>Qualità a rischio:</b> Valori RF elevati creano artefatti su gradienti e dettagli fini.";
             } else if (state.rf < 19) {
@@ -347,23 +388,38 @@
             if (!state.fileLoaded) return;
 
             let hbEncoder = "x265";
+            // Se siamo in modalità social forzata a BT.709, in alcuni casi Handbrake 
+            // preferisce il codec 8-bit per evitare taglie errate sui server, 
+            // ma il vt_h265 10-bit gestisce bene il down-sampling SDR.
             if (state.hardware === 'mac_hw_10') hbEncoder = "vt_h265_10bit";
             if (state.hardware === 'mac_hw_8') hbEncoder = "vt_h265";
 
             const audioTracks = [];
-            audioTracks.push({
-                "AudioEncoder": "copy", 
-                "AudioMixdown": "auto",
-                "AudioTrackQualityEnable": false,
-                "AudioTrackDRCEnable": false
-            });
-
-            if (state.audioStrategy === 'passthrough_aac') {
+            
+            // Seleziona la strategia Audio
+            if (state.audioStrategy === 'social_aac') {
+                // Solo AAC, zero passthrough (essenziale per web/dashboard)
                 audioTracks.push({
                     "AudioEncoder": "ca_aac", 
                     "AudioMixdown": "stereo",
                     "AudioBitrate": 128
                 });
+            } else {
+                // Setup Standard con Passthrough
+                audioTracks.push({
+                    "AudioEncoder": "copy", 
+                    "AudioMixdown": "auto",
+                    "AudioTrackQualityEnable": false,
+                    "AudioTrackDRCEnable": false
+                });
+
+                if (state.audioStrategy === 'passthrough_aac') {
+                    audioTracks.push({
+                        "AudioEncoder": "ca_aac", 
+                        "AudioMixdown": "stereo",
+                        "AudioBitrate": 128
+                    });
+                }
             }
 
             let deinterlaceStr = "off";
@@ -379,7 +435,7 @@
                     {
                         "PresetName": `WebSetup Mac (${hbEncoder}) RF${state.rf}`,
                         "Description": "Ottimizzazione automatizzata generata per architetture Apple Silicon.",
-                        "Container": "av_mkv",
+                        "Container": "av_mp4", // Per i social l'MP4 è generalmente più sicuro dell'MKV
                         "VideoEncoder": hbEncoder,
                         "VideoQualityType": 2, 
                         "VideoQualitySlider": state.rf,
@@ -389,7 +445,6 @@
                         "PictureAutoCrop": true,
                         "PictureKeepRatio": true,
                         
-                        // Forziamo Detelecine su 'off' per evitare latenza software inutile
                         "PictureDeinterlaceFilter": deinterlaceStr,
                         "PictureDetelecineFilter": "off",
                         "PictureDenoiseFilter": denoiseStr,
@@ -408,7 +463,7 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(presetJSON, null, 4));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", `HandBrake_Mac_RF${state.rf}.json`);
+            downloadAnchorNode.setAttribute("download", `HandBrake_${state.target.toUpperCase()}_RF${state.rf}.json`);
             document.body.appendChild(downloadAnchorNode); 
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
