@@ -71,23 +71,34 @@
                         Parametri di Calcolo Matematico (Modificabili)
                     </p>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        
+                        <!-- Nuovo Modulo Durata: hh / mm / ss -->
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Durata (secondi)</label>
-                            <input type="number" id="calcDuration" class="w-full bg-gray-800 border border-gray-600 rounded p-2 text-white text-sm focus:ring-blue-500" placeholder="Es. 157">
+                            <label class="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Durata Filmato</label>
+                            <div class="flex items-center gap-1">
+                                <input type="number" id="calcHours" min="0" class="w-full bg-gray-800 border border-gray-600 rounded p-2 text-white text-sm focus:ring-blue-500 text-center" placeholder="hh">
+                                <span class="text-gray-500 font-bold">:</span>
+                                <input type="number" id="calcMinutes" min="0" max="59" class="w-full bg-gray-800 border border-gray-600 rounded p-2 text-white text-sm focus:ring-blue-500 text-center" placeholder="mm">
+                                <span class="text-gray-500 font-bold">:</span>
+                                <input type="number" id="calcSeconds" min="0" max="59" class="w-full bg-gray-800 border border-gray-600 rounded p-2 text-white text-sm focus:ring-blue-500 text-center" placeholder="ss">
+                            </div>
                         </div>
+
                         <div>
                             <label class="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Risoluzione Totale (Px)</label>
-                            <select id="calcRes" class="w-full bg-gray-800 border border-gray-600 rounded p-2 text-white text-sm focus:ring-blue-500">
+                            <select id="calcRes" class="w-full h-[38px] bg-gray-800 border border-gray-600 rounded p-2 text-white text-sm focus:ring-blue-500">
                                 <option value="2073600">1920x1080 (FHD)</option>
                                 <option value="1440000">1080x1350 (Social Feed)</option>
                                 <option value="1036800">1080x960 (FHD Portrait)</option>
                                 <option value="8294400">3840x2160 (4K UHD)</option>
                             </select>
                         </div>
+                        
                         <div>
                             <label class="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Framerate (FPS)</label>
-                            <input type="number" id="calcFps" value="30" class="w-full bg-gray-800 border border-gray-600 rounded p-2 text-white text-sm focus:ring-blue-500">
+                            <input type="number" id="calcFps" value="30" class="w-full h-[38px] bg-gray-800 border border-gray-600 rounded p-2 text-white text-sm focus:ring-blue-500 text-center">
                         </div>
+
                     </div>
                 </div>
             </section>
@@ -210,7 +221,6 @@
                         <span>Trasparenza Master (CQ 100)</span>
                     </div>
                     
-                    <!-- NUOVA SCALA CORRETTA PER VIDEOTOOLBOX -->
                     <input type="range" id="cqSlider" min="50" max="100" step="1" value="75" class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-gray-600">
                     
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
@@ -247,7 +257,6 @@
     </div>
 
     <script>
-        // Lo stato usa CQ (Constant Quality scale 0-100) per VideoToolbox
         const state = {
             fileLoaded: false, originalSizeMB: 0, durationSec: 0, pixels: 2073600, fps: 30,
             cq: 75, hardware: 'mac_hw_10', chip: 'base', ram: '16gb', target: 'social',
@@ -264,6 +273,17 @@
             const k = 1024, dm = decimals < 0 ? 0 : decimals, sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        // Funzione per aggiornare i campi hh:mm:ss nell'HTML
+        function updateDurationInputs() {
+            const h = Math.floor(state.durationSec / 3600);
+            const m = Math.floor((state.durationSec % 3600) / 60);
+            const s = state.durationSec % 60;
+            
+            document.getElementById('calcHours').value = h > 0 ? h : "";
+            document.getElementById('calcMinutes').value = m > 0 || h > 0 ? m : ""; 
+            document.getElementById('calcSeconds').value = s;
         }
 
         // 1. Caricamento File 
@@ -285,11 +305,11 @@
                 state.durationSec = Math.floor(tempVideo.duration);
                 state.pixels = tempVideo.videoWidth * tempVideo.videoHeight;
                 
-                document.getElementById('fileDuration').textContent = `${Math.floor(state.durationSec / 60)}m ${state.durationSec % 60}s`;
+                document.getElementById('fileDuration').textContent = `${Math.floor(state.durationSec / 3600)}h ${Math.floor((state.durationSec % 3600) / 60)}m ${state.durationSec % 60}s`;
                 document.getElementById('fileRes').textContent = `${tempVideo.videoWidth}x${tempVideo.videoHeight}`;
 
-                // Popoliamo il fallback per sincronia visiva
-                document.getElementById('calcDuration').value = state.durationSec;
+                // Popoliamo il fallback per sincronia visiva con il nuovo sistema h/m/s
+                updateDurationInputs();
                 
                 sbloccaApp();
                 URL.revokeObjectURL(videoURL);
@@ -319,11 +339,25 @@
         document.getElementById('webOptimized').addEventListener('change', (e) => { state.webOptimized = e.target.checked; });
         document.getElementById('alignAV').addEventListener('change', (e) => { state.alignAV = e.target.checked; });
 
-        // Listener Calcolatore Manuale
-        document.getElementById('calcDuration').addEventListener('input', function(e) {
-            state.durationSec = parseFloat(e.target.value) || 1;
+        // Listener Calcolatore Manuale Durata (Nuovo Sistema HH:MM:SS)
+        function calcDurationFromInputs() {
+            const h = parseInt(document.getElementById('calcHours').value) || 0;
+            const m = parseInt(document.getElementById('calcMinutes').value) || 0;
+            const s = parseInt(document.getElementById('calcSeconds').value) || 0;
+            
+            state.durationSec = (h * 3600) + (m * 60) + s;
+            
+            // Garantisce un minimo di 1 secondo per evitare errori nelle stime del bitrate
+            if (state.durationSec === 0) state.durationSec = 1; 
+            
             updateEstimates();
-        });
+        }
+
+        document.getElementById('calcHours').addEventListener('input', calcDurationFromInputs);
+        document.getElementById('calcMinutes').addEventListener('input', calcDurationFromInputs);
+        document.getElementById('calcSeconds').addEventListener('input', calcDurationFromInputs);
+
+        // Listener Altri Parametri Manuali
         document.getElementById('calcRes').addEventListener('change', function(e) {
             state.pixels = parseInt(e.target.value);
             updateEstimates();
@@ -377,7 +411,6 @@
             if(state.denoise === 'strong') totalBitrateMbps *= 0.70; 
 
             // Calcolo BPP (Bits Per Pixel)
-            // (Bitrate in bits) / (Pixels * FPS)
             const bpp = (baseVideoBitrateMbps * 1000000) / (state.pixels * state.fps);
             document.getElementById('estBPP').textContent = bpp.toFixed(3);
             
