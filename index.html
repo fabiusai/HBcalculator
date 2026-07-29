@@ -67,7 +67,7 @@
                     <svg class="w-6 h-6 mr-3 text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                     <div>
                         <h4 class="font-bold text-purple-400">Modalità Social Automatica Attivata</h4>
-                        <p class="text-sm mt-1">È stato rilevato un formato tipico da piattaforma social (verticale o quadrato). Sono state applicate protezioni anti-degrado cromatico (forzatura BT.709), tracce audio compatibili con le dashboard di pubblicazione e un bitrate RF ideale per sopravvivere alla ricompressione dei server.</p>
+                        <p class="text-sm mt-1">È stato rilevato un formato tipico da feed (verticale o quadrato). Sono state applicate protezioni anti-degrado (forzatura BT.709), tracce audio compatibili e un <b>bitrate RF 17 elevato</b>. Questo genererà un "master robusto" in grado di resistere alla compressione distruttiva dei server di pubblicazione senza mostrare artefatti.</p>
                     </div>
                 </div>
             </section>
@@ -86,12 +86,12 @@
                         </select>
                         <div class="flex gap-2">
                             <select id="chipSelect" class="w-1/2 bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                                <option value="base">Chip M1/M2/M3 (Base)</option>
+                                <option value="base">Chip M1/M2/M3/M4 (Base)</option>
                                 <option value="pro">Chip Pro</option>
                                 <option value="max">Chip Max / Ultra</option>
                             </select>
                             <select id="ramSelect" class="w-1/2 bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                                <option value="16gb">16GB / 32GB+ RAM</option>
+                                <option value="16gb">16GB / 24GB / 32GB+ RAM</option>
                                 <option value="8gb">8GB RAM</option>
                             </select>
                         </div>
@@ -257,22 +257,19 @@
 
                 // --- SMART SOCIAL DETECTION ---
                 const ratio = state.width / state.height;
-                // Consideriamo formati Social quelli con ratio <= 1 (es. 4:5 caroselli, 9:16 reels, 1:1 quadrato)
-                // Aggiungiamo un piccolissimo margine (1.05) per tolleranza
                 if (ratio <= 1.05) {
                     state.target = 'social';
                     document.getElementById('targetSelect').value = 'social';
                     
-                    // Ottimizzazioni obbligate per i tool di marketing e social
-                    state.colorSpace = 'bt709'; // Evita l'effetto slavato da Log/HDR
+                    state.colorSpace = 'bt709'; 
                     document.getElementById('colorSpaceSelect').value = 'bt709';
                     
-                    state.audioStrategy = 'social_aac'; // Elimina il passthrough non supportato
+                    state.audioStrategy = 'social_aac'; 
                     document.getElementById('audioStrategy').value = 'social_aac';
                     
-                    state.rf = 20; // Abbassiamo leggermente l'RF per resistere alla ri-compressione web
-                    rfSlider.value = 20;
-                    document.getElementById('rfValueLabel').textContent = `RF 20`;
+                    state.rf = 17; // RF 17 per resistere alla compressione
+                    rfSlider.value = 17;
+                    document.getElementById('rfValueLabel').textContent = `RF 17`;
                     
                     socialAlert.classList.remove('hidden');
                 } else {
@@ -309,7 +306,8 @@
             if(state.target === 'archive') rfSlider.value = 26;
             if(state.target === 'editing') rfSlider.value = 18;
             if(state.target === 'social') {
-                rfSlider.value = 20;
+                rfSlider.value = 17;
+                state.rf = 17;
                 document.getElementById('colorSpaceSelect').value = 'bt709';
                 state.colorSpace = 'bt709';
                 document.getElementById('audioStrategy').value = 'social_aac';
@@ -362,8 +360,6 @@
             const timeSeconds = totalFrames / hwFps;
             document.getElementById('estTime').textContent = `~ ${Math.ceil(timeSeconds / 60)} min`;
 
-            // Aggiorna nome codec. Se il target è social e siamo su hardware 10-bit, 
-            // ma forziamo bt709, il Mac userà comunque l'encoder ma comprimerà lo spazio colore.
             let encoderName = state.hardware.includes('10') ? 'HW 10-bit' : state.hardware.includes('hw') ? 'HW 8-bit' : 'x265 CPU';
             document.getElementById('estCodec').textContent = encoderName;
 
@@ -388,24 +384,18 @@
             if (!state.fileLoaded) return;
 
             let hbEncoder = "x265";
-            // Se siamo in modalità social forzata a BT.709, in alcuni casi Handbrake 
-            // preferisce il codec 8-bit per evitare taglie errate sui server, 
-            // ma il vt_h265 10-bit gestisce bene il down-sampling SDR.
             if (state.hardware === 'mac_hw_10') hbEncoder = "vt_h265_10bit";
             if (state.hardware === 'mac_hw_8') hbEncoder = "vt_h265";
 
             const audioTracks = [];
             
-            // Seleziona la strategia Audio
             if (state.audioStrategy === 'social_aac') {
-                // Solo AAC, zero passthrough (essenziale per web/dashboard)
                 audioTracks.push({
                     "AudioEncoder": "ca_aac", 
                     "AudioMixdown": "stereo",
                     "AudioBitrate": 128
                 });
             } else {
-                // Setup Standard con Passthrough
                 audioTracks.push({
                     "AudioEncoder": "copy", 
                     "AudioMixdown": "auto",
@@ -429,13 +419,16 @@
             let denoiseTune = "none";
             if (state.denoise === 'light') { denoiseStr = "nlmeans"; denoiseTune = "light"; }
             if (state.denoise === 'strong') { denoiseStr = "nlmeans"; denoiseTune = "strong"; }
+            
+            // Imposta MP4 per i social, altrimenti MKV
+            const fileContainer = state.target === 'social' ? "av_mp4" : "av_mkv";
 
             const presetJSON = {
                 "PresetList": [
                     {
                         "PresetName": `WebSetup Mac (${hbEncoder}) RF${state.rf}`,
                         "Description": "Ottimizzazione automatizzata generata per architetture Apple Silicon.",
-                        "Container": "av_mp4", // Per i social l'MP4 è generalmente più sicuro dell'MKV
+                        "Container": fileContainer,
                         "VideoEncoder": hbEncoder,
                         "VideoQualityType": 2, 
                         "VideoQualitySlider": state.rf,
