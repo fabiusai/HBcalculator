@@ -33,7 +33,7 @@
         <div class="bg-gray-900 p-6 border-b border-gray-700 flex justify-between items-center">
             <div>
                 <h1 class="text-2xl font-bold text-blue-400">HandBrake Setup Assistant <span class="text-xs bg-gray-700 text-white px-2 py-1 rounded ml-2">VideoToolbox BPP Calc</span></h1>
-                <p class="text-sm text-gray-400 mt-1">Calcolatore Bitrate avanzato basato su scala CQ (0-100) per encoder Apple Hardware.</p>
+                <p class="text-sm text-gray-400 mt-1">Calcolatore Bitrate avanzato basato su scala CQ (0-100) e gestione profonda dell'efficienza algoritmica.</p>
             </div>
         </div>
 
@@ -64,7 +64,7 @@
                     </div>
                 </div>
 
-                <!-- OVERRIDE MANUALE DR. LEX STYLE -->
+                <!-- OVERRIDE MANUALE -->
                 <div id="manualFallback" class="mt-4 p-5 rounded-lg bg-gray-900 border border-gray-700 text-left">
                     <p class="text-sm text-gray-400 font-semibold mb-3 flex items-center">
                         <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -72,7 +72,6 @@
                     </p>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         
-                        <!-- Nuovo Modulo Durata: hh / mm / ss -->
                         <div>
                             <label class="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Durata Filmato</label>
                             <div class="flex items-center gap-1">
@@ -107,12 +106,36 @@
             <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <h2 class="text-lg font-semibold mb-3 flex items-center text-gray-200">
-                        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">2</span> Configurazione Encoding
+                        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">2</span> Architettura di Calcolo
                     </h2>
-                    <div class="space-y-3">
+                    <div class="space-y-4">
                         <select id="hardwareSelect" class="w-full bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                            <option value="mac_hw_10">VideoToolbox H.265 (10-bit - Profilo Log/Master)</option>
-                            <option value="mac_hw_8">VideoToolbox H.265 (8-bit)</option>
+                            <option value="mac_hw_10">VideoToolbox H.265 (10-bit - Velocità e fedeltà Log)</option>
+                            <option value="mac_hw_8">VideoToolbox H.265 (8-bit - Compatibilità base)</option>
+                            <option value="mac_sw_10">CPU x265 10-bit (Lentissimo - Master Eccelso)</option>
+                        </select>
+                        
+                        <!-- NUOVO CONTROLLO: Efficienza Algoritmica -->
+                        <div class="bg-gray-900 p-3 rounded-lg border border-gray-700">
+                            <label class="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Efficienza Algoritmo / Tempo (Encoder Preset)</label>
+                            <select id="swPresetSelect" class="w-full bg-gray-800 border border-gray-600 text-sm rounded focus:ring-blue-500 p-2 text-white opacity-50 cursor-not-allowed" disabled>
+                                <option value="medium">Medium (Bilanciato)</option>
+                                <option value="slow">Slow (Alta Qualità per Archivio)</option>
+                                <option value="slower">Slower (Qualità Estrema)</option>
+                                <option value="veryslow">Very Slow (Perfezione assoluta, ore di calcolo)</option>
+                            </select>
+                            <p class="text-[10px] text-yellow-500 mt-2 leading-tight" id="presetNotice">Utilizzando l'Hardware Apple, questo parametro è inibito e già bloccato alla massima qualità fisica consentita dal chip. Passa a "CPU x265" per sbloccare l'analisi matematica profonda.</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold mb-3 flex items-center text-gray-200">
+                        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">3</span> Destinazione Workflow
+                    </h2>
+                    <div class="space-y-4">
+                        <select id="targetSelect" class="w-full bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
+                            <option value="social">Distribuzione Social / Dashboard Multicanale (SDR)</option>
+                            <option value="editing">Archivio FCPX / NAS (Lossless / HDR)</option>
                         </select>
                         <div class="flex gap-2">
                             <select id="chipSelect" class="w-1/2 bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
@@ -125,15 +148,6 @@
                             </select>
                         </div>
                     </div>
-                </div>
-                <div>
-                    <h2 class="text-lg font-semibold mb-3 flex items-center text-gray-200">
-                        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">3</span> Destinazione Workflow
-                    </h2>
-                    <select id="targetSelect" class="w-full h-full max-h-11 bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                        <option value="social">Distribuzione Social / Dashboard Multicanale (SDR)</option>
-                        <option value="editing">Archivio FCPX / NAS (Lossless / HDR)</option>
-                    </select>
                 </div>
             </section>
 
@@ -261,12 +275,15 @@
             fileLoaded: false, originalSizeMB: 0, durationSec: 0, pixels: 2073600, fps: 30,
             cq: 75, hardware: 'mac_hw_10', chip: 'base', ram: '16gb', target: 'social',
             audioStrategy: 'social_aac', denoise: 'off', colorSpace: 'bt709',
-            container: 'av_mp4', keepMetadata: true, webOptimized: false, alignAV: true
+            container: 'av_mp4', keepMetadata: true, webOptimized: false, alignAV: true,
+            swPreset: 'slow'
         };
 
         const fileInput = document.getElementById('fileInput');
         const downloadBtn = document.getElementById('downloadBtn');
         const cqSlider = document.getElementById('cqSlider');
+        const swPresetSelect = document.getElementById('swPresetSelect');
+        const presetNotice = document.getElementById('presetNotice');
 
         function formatBytes(bytes, decimals = 2) {
             if (bytes === 0) return '0 Bytes';
@@ -275,7 +292,6 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
         }
 
-        // Funzione per aggiornare i campi hh:mm:ss nell'HTML
         function updateDurationInputs() {
             const h = Math.floor(state.durationSec / 3600);
             const m = Math.floor((state.durationSec % 3600) / 60);
@@ -286,7 +302,6 @@
             document.getElementById('calcSeconds').value = s;
         }
 
-        // 1. Caricamento File 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -308,7 +323,6 @@
                 document.getElementById('fileDuration').textContent = `${Math.floor(state.durationSec / 3600)}h ${Math.floor((state.durationSec % 3600) / 60)}m ${state.durationSec % 60}s`;
                 document.getElementById('fileRes').textContent = `${tempVideo.videoWidth}x${tempVideo.videoHeight}`;
 
-                // Popoliamo il fallback per sincronia visiva con il nuovo sistema h/m/s
                 updateDurationInputs();
                 
                 sbloccaApp();
@@ -316,7 +330,6 @@
             });
 
             tempVideo.addEventListener('error', function() {
-                // Il browser non lo legge (es. ProRes). Sblocchiamo comunque l'app
                 document.getElementById('fileDuration').textContent = "Ignorato (Dati manuali)";
                 document.getElementById('fileRes').textContent = "Ignorato (Dati manuali)";
                 sbloccaApp();
@@ -333,23 +346,18 @@
             updateEstimates();
         }
 
-        // Listener Pannello Strutturale
         document.getElementById('containerSelect').addEventListener('change', (e) => { state.container = e.target.value; });
         document.getElementById('keepMetadata').addEventListener('change', (e) => { state.keepMetadata = e.target.checked; });
         document.getElementById('webOptimized').addEventListener('change', (e) => { state.webOptimized = e.target.checked; });
         document.getElementById('alignAV').addEventListener('change', (e) => { state.alignAV = e.target.checked; });
 
-        // Listener Calcolatore Manuale Durata (Nuovo Sistema HH:MM:SS)
         function calcDurationFromInputs() {
             const h = parseInt(document.getElementById('calcHours').value) || 0;
             const m = parseInt(document.getElementById('calcMinutes').value) || 0;
             const s = parseInt(document.getElementById('calcSeconds').value) || 0;
             
             state.durationSec = (h * 3600) + (m * 60) + s;
-            
-            // Garantisce un minimo di 1 secondo per evitare errori nelle stime del bitrate
             if (state.durationSec === 0) state.durationSec = 1; 
-            
             updateEstimates();
         }
 
@@ -357,7 +365,6 @@
         document.getElementById('calcMinutes').addEventListener('input', calcDurationFromInputs);
         document.getElementById('calcSeconds').addEventListener('input', calcDurationFromInputs);
 
-        // Listener Altri Parametri Manuali
         document.getElementById('calcRes').addEventListener('change', function(e) {
             state.pixels = parseInt(e.target.value);
             updateEstimates();
@@ -367,8 +374,26 @@
             updateEstimates();
         });
 
-        // Config Mac
-        document.getElementById('hardwareSelect').addEventListener('change', (e) => { state.hardware = e.target.value; updateEstimates(); });
+        // Toggle UI Encoder Software vs Hardware
+        document.getElementById('hardwareSelect').addEventListener('change', (e) => { 
+            state.hardware = e.target.value; 
+            
+            if (state.hardware === 'mac_sw_10') {
+                swPresetSelect.disabled = false;
+                swPresetSelect.classList.remove('opacity-50', 'cursor-not-allowed');
+                presetNotice.textContent = "✓ Modalità CPU attiva. Seleziona la profondità dell'analisi per scalare la qualità (Slower/Very Slow sbloccano l'efficienza massima).";
+                presetNotice.className = "text-[10px] text-green-500 mt-2 leading-tight";
+            } else {
+                swPresetSelect.disabled = true;
+                swPresetSelect.classList.add('opacity-50', 'cursor-not-allowed');
+                presetNotice.textContent = "Utilizzando l'Hardware Apple, questo parametro è inibito e già bloccato alla massima qualità fisica consentita dal chip. Passa a \"CPU x265\" per sbloccare l'analisi matematica profonda.";
+                presetNotice.className = "text-[10px] text-yellow-500 mt-2 leading-tight";
+            }
+            updateEstimates(); 
+        });
+
+        swPresetSelect.addEventListener('change', (e) => { state.swPreset = e.target.value; updateEstimates(); });
+
         document.getElementById('chipSelect').addEventListener('change', (e) => { state.chip = e.target.value; updateEstimates(); });
         document.getElementById('ramSelect').addEventListener('change', (e) => { state.ram = e.target.value; updateEstimates(); });
         
@@ -395,14 +420,19 @@
         document.getElementById('denoiseSelect').addEventListener('change', (e) => { state.denoise = e.target.value; updateEstimates(); });
         document.getElementById('colorSpaceSelect').addEventListener('change', (e) => { state.colorSpace = e.target.value; });
 
-        // 3. Stime Matematiche (Curva CQ VideoToolbox)
         function updateEstimates() {
             if (!state.fileLoaded && state.durationSec === 0) return;
             
             document.getElementById('cqValueLabel').textContent = `CQ ${state.cq}`;
 
-            // Formula Curva VideoToolbox: CQ 50 = ~2Mbps(1080p), CQ 75 = ~15Mbps, CQ 90 = ~50Mbps
             let baseVideoBitrateMbps = (Math.pow(1.085, state.cq - 50) * 2.0) * (state.pixels / 2073600);
+
+            // Efficienza Software (CPU abbassa leggermente il bitrate a parità di CQ perché è più efficiente)
+            if (state.hardware === 'mac_sw_10') {
+                if (state.swPreset === 'slow') baseVideoBitrateMbps *= 0.95;
+                if (state.swPreset === 'slower') baseVideoBitrateMbps *= 0.90;
+                if (state.swPreset === 'veryslow') baseVideoBitrateMbps *= 0.85;
+            }
 
             let audioBitrateMbps = (state.audioStrategy === 'social_aac') ? 0.128 : 0.6;
             let totalBitrateMbps = baseVideoBitrateMbps + audioBitrateMbps;
@@ -410,7 +440,6 @@
             if(state.denoise === 'light') totalBitrateMbps *= 0.85; 
             if(state.denoise === 'strong') totalBitrateMbps *= 0.70; 
 
-            // Calcolo BPP (Bits Per Pixel)
             const bpp = (baseVideoBitrateMbps * 1000000) / (state.pixels * state.fps);
             document.getElementById('estBPP').textContent = bpp.toFixed(3);
             
@@ -420,7 +449,6 @@
             else if (bpp >= 0.15 && bpp < 0.35) { bppLabel.textContent = "Ottimo / Master"; bppLabel.className = "text-[10px] uppercase mt-1 text-green-500"; }
             else { bppLabel.textContent = "Trasparenza Assoluta"; bppLabel.className = "text-[10px] uppercase mt-1 text-blue-500"; }
 
-            // Stima MB
             const estimatedMB = (totalBitrateMbps * state.durationSec) / 8;
             const minSize = estimatedMB * 0.5; 
             const maxSize = estimatedMB * 1.5;
@@ -431,26 +459,48 @@
             document.getElementById('estSize').textContent = sizeText;
             document.getElementById('estBitrate').textContent = `~ ${totalBitrateMbps.toFixed(1)} Mbps`;
 
-            // Tempistiche Mac
+            // Tempistiche Mac (Penalità enorme per preset software lenti)
             const is4k = state.pixels > 2100000;
             const totalFrames = state.durationSec * state.fps; 
             let hwFps = is4k ? 90 : 220; 
+            
             if (state.chip === 'pro') hwFps *= 1.4;
             if (state.ram === '8gb' && is4k) hwFps *= 0.75; 
             if(state.denoise === 'light') hwFps *= 0.4;
             if(state.denoise === 'strong') hwFps *= 0.15;
 
+            // Se usiamo la CPU, gli FPS crollano matematicamente
+            if (state.hardware === 'mac_sw_10') {
+                hwFps = is4k ? 15 : 45; // Baseline Software
+                if (state.swPreset === 'slow') hwFps *= 0.8;
+                if (state.swPreset === 'slower') hwFps *= 0.5;
+                if (state.swPreset === 'veryslow') hwFps *= 0.2; // Lentissimo
+            }
+
             const timeSeconds = totalFrames / hwFps;
             document.getElementById('estTime').textContent = (timeSeconds < 60) ? `~ ${Math.ceil(timeSeconds)} sec` : `~ ${Math.ceil(timeSeconds / 60)} min`;
         }
 
-        // 4. Generazione JSON
+        // 4. Generazione JSON Corretto
         downloadBtn.addEventListener('click', () => {
             if (!state.fileLoaded && state.durationSec === 0) return;
 
-            const hbEncoder = (state.hardware === 'mac_hw_10') ? "vt_h265_10bit" : "vt_h265";
+            let hbEncoder = "x265";
+            let videoPreset = "quality";
+
+            // LOGICA CORRETTA ENCODER
+            if (state.hardware === 'mac_hw_10') {
+                hbEncoder = "vt_h265_10bit";
+                videoPreset = "quality"; // Apple HW Forza Quality
+            } else if (state.hardware === 'mac_hw_8') {
+                hbEncoder = "vt_h265";
+                videoPreset = "quality"; // Apple HW Forza Quality
+            } else if (state.hardware === 'mac_sw_10') {
+                hbEncoder = "x265_10bit";
+                videoPreset = state.swPreset; // Inietta "slow", "slower", ecc.
+            }
+
             const audioTracks = [];
-            
             if (state.audioStrategy === 'social_aac') {
                 audioTracks.push({ "AudioEncoder": "ca_aac", "AudioMixdown": "stereo", "AudioBitrate": 128 });
             } else {
@@ -469,17 +519,19 @@
                 "PresetList": [
                     {
                         "PresetName": `WebSetup Mac (${hbEncoder}) CQ${state.cq}`,
-                        "Description": "Profilo Analitico calibrato per Apple Silicon VideoToolbox.",
+                        "Description": "Profilo Analitico calibrato per Apple Silicon.",
                         "Container": state.container,
                         "VideoEncoder": hbEncoder,
                         
-                        // INIEZIONE CORRETTA CQ VIDEOTOOLBOX
+                        // CQ VIDEOTOOLBOX e CRF x265
                         "VideoQualityType": 2, 
                         "VideoQualitySlider": state.cq,
                         
                         "VideoFramerate": "auto",
                         "VideoFramerateMode": "vfr", 
-                        "VideoPreset": "quality", 
+                        
+                        // INIEZIONE PRESET EFFICIENZA (quality per HW, slow/slower per SW)
+                        "VideoPreset": videoPreset, 
                         
                         "PictureAutoCrop": true,
                         "PictureKeepRatio": true,
@@ -505,7 +557,7 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(presetJSON, null, 4));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", `HandBrake_VT_CQ${state.cq}.json`);
+            downloadAnchorNode.setAttribute("download", `HandBrake_${hbEncoder}_CQ${state.cq}.json`);
             document.body.appendChild(downloadAnchorNode); 
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
