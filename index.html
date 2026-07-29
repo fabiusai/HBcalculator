@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HandBrake Web Setup - Mac Edition</title>
+    <title>HandBrake Pro Setup - Apple Silicon</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         input[type=range]::-webkit-slider-thumb {
@@ -30,44 +30,64 @@
 
     <div class="max-w-5xl mx-auto bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
         
-        <div class="bg-gray-900 p-6 border-b border-gray-700">
-            <h1 class="text-2xl font-bold text-blue-400">HandBrake Setup Assistant <span class="text-xs bg-gray-700 text-white px-2 py-1 rounded ml-2">Mac Optimized</span></h1>
-            <p class="text-sm text-gray-400 mt-1">Generatore di Preset JSON con rilevamento intelligente del formato per i canali social.</p>
+        <div class="bg-gray-900 p-6 border-b border-gray-700 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-blue-400">HandBrake Setup Assistant <span class="text-xs bg-gray-700 text-white px-2 py-1 rounded ml-2">VideoToolbox BPP Calc</span></h1>
+                <p class="text-sm text-gray-400 mt-1">Calcolatore Bitrate avanzato basato su scala CQ (0-100) per encoder Apple Hardware.</p>
+            </div>
         </div>
 
         <div class="p-6 space-y-8">
             
-            <!-- 1. Input File -->
+            <!-- 1. Input File & Metadati -->
             <section>
                 <h2 class="text-lg font-semibold mb-3 flex items-center text-gray-200">
-                    <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">1</span> File Video Originale
+                    <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">1</span> Analisi Master Originale
                 </h2>
+                
                 <div id="dropzone" class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-gray-700 transition relative">
                     <input type="file" id="fileInput" accept="video/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                     <div id="dropText">
                         <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
-                        <p class="text-gray-300 font-medium">Trascina qui il file o clicca per sfogliare</p>
-                        <p class="text-xs text-gray-500 mt-1">Analisi offline sicura</p>
+                        <p class="text-gray-300 font-medium">Trascina qui il file sorgente o clicca per sfogliare</p>
                     </div>
                     
-                    <div id="fileData" class="hidden text-left bg-gray-900 p-4 rounded mt-4 border border-gray-700">
+                    <div id="fileData" class="hidden text-left bg-gray-900 p-4 rounded mt-4 border border-gray-700 relative z-10">
                         <p class="font-mono text-sm text-blue-400 mb-2 truncate" id="fileName">-</p>
                         <div class="grid grid-cols-3 gap-4 text-sm">
                             <div><span class="text-gray-500">Risoluzione:</span> <span id="fileRes" class="font-semibold text-gray-200"></span></div>
-                            <div><span class="text-gray-500">Dimensione:</span> <span id="fileSize" class="font-semibold text-gray-200"></span></div>
+                            <div><span class="text-gray-500">Dimensione Orig.:</span> <span id="fileSize" class="font-semibold text-gray-200"></span></div>
                             <div><span class="text-gray-500">Durata:</span> <span id="fileDuration" class="font-semibold text-gray-200"></span></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Alert Smart Social Detection -->
-                <div id="socialAlert" class="hidden mt-4 p-4 rounded-lg bg-purple-900/30 text-purple-300 border border-purple-800 flex items-start">
-                    <svg class="w-6 h-6 mr-3 text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    <div>
-                        <h4 class="font-bold text-purple-400">Modalità Social Automatica Attivata</h4>
-                        <p class="text-sm mt-1">È stato rilevato un formato tipico da feed (verticale o quadrato). Sono state applicate protezioni anti-degrado (forzatura BT.709), tracce audio compatibili e un <b>bitrate RF 17 elevato</b>. Questo genererà un "master robusto" in grado di resistere alla compressione distruttiva dei server di pubblicazione senza mostrare artefatti.</p>
+                <!-- OVERRIDE MANUALE DR. LEX STYLE -->
+                <div id="manualFallback" class="mt-4 p-5 rounded-lg bg-gray-900 border border-gray-700 text-left">
+                    <p class="text-sm text-gray-400 font-semibold mb-3 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Parametri di Calcolo Matematico (Modificabili)
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Durata (secondi)</label>
+                            <input type="number" id="calcDuration" class="w-full bg-gray-800 border border-gray-600 rounded p-2 text-white text-sm focus:ring-blue-500" placeholder="Es. 157">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Risoluzione Totale (Px)</label>
+                            <select id="calcRes" class="w-full bg-gray-800 border border-gray-600 rounded p-2 text-white text-sm focus:ring-blue-500">
+                                <option value="2073600">1920x1080 (FHD)</option>
+                                <option value="1440000">1080x1350 (Social Feed)</option>
+                                <option value="1036800">1080x960 (FHD Portrait)</option>
+                                <option value="8294400">3840x2160 (4K UHD)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Framerate (FPS)</label>
+                            <input type="number" id="calcFps" value="30" class="w-full bg-gray-800 border border-gray-600 rounded p-2 text-white text-sm focus:ring-blue-500">
+                        </div>
                     </div>
                 </div>
             </section>
@@ -76,22 +96,20 @@
             <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <h2 class="text-lg font-semibold mb-3 flex items-center text-gray-200">
-                        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">2</span> Configurazione Mac
+                        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">2</span> Configurazione Encoding
                     </h2>
                     <div class="space-y-3">
                         <select id="hardwareSelect" class="w-full bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                            <option value="mac_hw_10">VideoToolbox H.265 (10-bit - Ideale per master/Log)</option>
+                            <option value="mac_hw_10">VideoToolbox H.265 (10-bit - Profilo Log/Master)</option>
                             <option value="mac_hw_8">VideoToolbox H.265 (8-bit)</option>
-                            <option value="mac_sw">CPU x265 (Sconsigliato - Molto Lento)</option>
                         </select>
                         <div class="flex gap-2">
                             <select id="chipSelect" class="w-1/2 bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                                <option value="base">Chip M1/M2/M3/M4 (Base)</option>
-                                <option value="pro">Chip Pro</option>
-                                <option value="max">Chip Max / Ultra</option>
+                                <option value="base">Chip M1/M2/M3/M4</option>
+                                <option value="pro">Chip Pro / Max</option>
                             </select>
                             <select id="ramSelect" class="w-1/2 bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                                <option value="16gb">16GB / 24GB / 32GB+ RAM</option>
+                                <option value="16gb">16GB / 24GB+ RAM</option>
                                 <option value="8gb">8GB RAM</option>
                             </select>
                         </div>
@@ -99,24 +117,22 @@
                 </div>
                 <div>
                     <h2 class="text-lg font-semibold mb-3 flex items-center text-gray-200">
-                        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">3</span> Destinazione Principale
+                        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">3</span> Destinazione Workflow
                     </h2>
                     <select id="targetSelect" class="w-full h-full max-h-11 bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                        <option value="nas">Rete Locale / NAS (Bilanciamento ottimale)</option>
-                        <option value="social">Canali Social / App Schedulazione (Ottimizzato)</option>
-                        <option value="archive">Archiviazione fredda (Massima compressione)</option>
-                        <option value="editing">Conservazione Master (Quasi-lossless)</option>
+                        <option value="social">Distribuzione Social / Dashboard Multicanale (SDR)</option>
+                        <option value="editing">Archivio FCPX / NAS (Lossless / HDR)</option>
                     </select>
                 </div>
             </section>
 
-            <!-- 3. Filtri Avanzati & Audio -->
+            <!-- 3. Filtri Avanzati, Formati & Audio -->
             <section>
                 <details class="group bg-gray-900 border border-gray-700 rounded-lg">
                     <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-gray-200 hover:bg-gray-800 transition">
                         <div class="flex items-center">
                             <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">4</span> 
-                            Filtri Avanzati & Gestione Audio
+                            Formato, Filtri Avanzati & Audio
                         </div>
                         <svg class="w-5 h-5 text-gray-400 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </summary>
@@ -124,38 +140,55 @@
                     <div class="p-6 pt-2 border-t border-gray-700 space-y-6">
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">Strategia Audio Tracce</label>
-                            <select id="audioStrategy" class="w-full bg-gray-800 border border-gray-600 text-sm rounded focus:ring-blue-500 p-2 text-white">
-                                <option value="passthrough_aac">1. Passthrough + Traccia AAC Stereo (128 kbps)</option>
-                                <option value="passthrough_only">2. Solo Passthrough (Bit-perfect)</option>
-                                <option value="social_aac">3. Solo AAC Stereo 128kbps (Ottimizzato Web/Social)</option>
-                            </select>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Formato Contenitore e Struttura File</label>
+                            <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+                                <div class="flex items-center">
+                                    <label class="mr-2 text-sm text-gray-400">Formato:</label>
+                                    <select id="containerSelect" class="bg-gray-800 border border-gray-600 text-sm rounded focus:ring-blue-500 p-2 text-white">
+                                        <option value="av_mp4">MP4</option>
+                                        <option value="av_mkv">MKV</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="flex items-center text-sm text-gray-300 cursor-pointer">
+                                        <input type="checkbox" id="keepMetadata" checked class="mr-2 rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500">
+                                        Mantieni metadata (Consigliato per Log)
+                                    </label>
+                                    <label class="flex items-center text-sm text-gray-300 cursor-pointer">
+                                        <input type="checkbox" id="webOptimized" class="mr-2 rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500">
+                                        Ottimizza per web (Sposta atomo MOOV)
+                                    </label>
+                                    <label class="flex items-center text-sm text-gray-300 cursor-pointer">
+                                        <input type="checkbox" id="alignAV" checked class="mr-2 rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500">
+                                        Allinea inizio A/V
+                                    </label>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="border-t border-gray-700 pt-4">
-                            <div class="flex items-center justify-between mb-1">
-                                <label class="text-sm font-medium text-gray-300">Sorgente Interlacciata (Deinterlaccio)</label>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="interlacedToggle" class="sr-only peer">
-                                    <div class="w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
-                                </label>
-                            </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Strategia Audio Tracce</label>
+                            <select id="audioStrategy" class="w-full bg-gray-800 border border-gray-600 text-sm rounded focus:ring-blue-500 p-2 text-white">
+                                <option value="social_aac">1. Solo AAC Stereo 128kbps (Sicuro per Social)</option>
+                                <option value="passthrough_aac">2. Passthrough + Traccia AAC Fallback</option>
+                                <option value="passthrough_only">3. Solo Passthrough (Bit-perfect)</option>
+                            </select>
                         </div>
 
                         <div class="border-t border-gray-700 pt-4">
                             <label class="block text-sm font-medium text-gray-300 mb-1">Riduzione Rumore (Denoise - NLMeans)</label>
                             <select id="denoiseSelect" class="w-full bg-gray-800 border border-gray-600 text-sm rounded focus:ring-blue-500 p-2 text-white">
-                                <option value="off">Spento (Nessuna elaborazione - Veloce)</option>
-                                <option value="light">Leggero (Ideale per pellicole e vecchia grana)</option>
-                                <option value="strong">Forte (Video scuri molto rumorosi)</option>
+                                <option value="off">Spento (Mantiene grana nativa)</option>
+                                <option value="light">Leggero (Abbassa BPP senza blurring)</option>
+                                <option value="strong">Forte (Artefatti probabili)</option>
                             </select>
                         </div>
 
                         <div class="border-t border-gray-700 pt-4">
                             <label class="block text-sm font-medium text-gray-300 mb-1">Spazio Colore (Color Space)</label>
                             <select id="colorSpaceSelect" class="w-full bg-gray-800 border border-gray-600 text-sm rounded focus:ring-blue-500 p-2 text-white">
-                                <option value="auto">Auto / Passthrough (Consigliato per Master)</option>
-                                <option value="bt709">Forza BT.709 (SDR Standard - Obbligatorio per Social)</option>
+                                <option value="bt709">Forza BT.709 (SDR Standard - Evita Social slavato)</option>
+                                <option value="auto">Auto / Passthrough (Master Conservativo)</option>
                                 <option value="bt2020">Forza BT.2020 (HDR / Wide Color)</option>
                             </select>
                         </div>
@@ -167,37 +200,36 @@
             <!-- 4. Qualità / Dimensione (Slider) -->
             <section>
                 <h2 class="text-lg font-semibold mb-3 flex items-center text-gray-200">
-                    <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">5</span> Bilanciamento RF & Stime
+                    <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">5</span> Analizzatore Bitrate / BPP
                 </h2>
                 <div class="bg-gray-900 p-6 rounded-lg border border-gray-700">
                     
-                    <div id="qualityAlert" class="mb-6 p-3 rounded-md text-sm flex items-center bg-green-900/30 text-green-400 border border-green-800">
-                        Ottimo bilanciamento.
-                    </div>
-
                     <div class="flex items-center justify-between text-sm text-gray-400 mb-2">
-                        <span>Minimo Spazio (RF 30)</span>
-                        <span class="font-bold text-white bg-blue-600 px-3 py-1 rounded-full text-md" id="rfValueLabel">RF 22</span>
-                        <span>Eccesso Trasparenza (RF 16)</span>
+                        <span>Compressione Alta (CQ 50)</span>
+                        <span class="font-bold text-white bg-blue-600 px-3 py-1 rounded-full text-md" id="cqValueLabel">CQ 75</span>
+                        <span>Trasparenza Master (CQ 100)</span>
                     </div>
-                    <input type="range" id="rfSlider" min="16" max="30" step="1" value="22" class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-gray-600">
+                    
+                    <!-- NUOVA SCALA CORRETTA PER VIDEOTOOLBOX -->
+                    <input type="range" id="cqSlider" min="50" max="100" step="1" value="75" class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-gray-600">
                     
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-                        <div class="bg-gray-800 p-4 rounded border border-gray-700 text-center">
-                            <p class="text-xs text-gray-400 uppercase tracking-wide">Dimensione</p>
+                        <div class="bg-gray-800 p-4 rounded border border-gray-700 text-center flex flex-col justify-center">
+                            <p class="text-[11px] text-gray-400 uppercase tracking-wide">Bits Per Pixel (BPP)</p>
+                            <p class="text-2xl font-mono font-bold text-blue-400 mt-1" id="estBPP">0.000</p>
+                            <p class="text-[10px] text-gray-500 mt-1 uppercase" id="bppLabel">Indice Qualità</p>
+                        </div>
+                        <div class="bg-gray-800 p-4 rounded border border-gray-700 text-center flex flex-col justify-center">
+                            <p class="text-[11px] text-gray-400 uppercase tracking-wide">Bitrate Target</p>
+                            <p class="text-xl font-bold text-green-400 mt-1" id="estBitrate">-- Mbps</p>
+                        </div>
+                        <div class="bg-gray-800 p-4 rounded border border-gray-700 text-center flex flex-col justify-center">
+                            <p class="text-[11px] text-gray-400 uppercase tracking-wide">Stima Dimensioni (VBR)</p>
                             <p class="text-xl font-bold text-white mt-1" id="estSize">-- MB</p>
                         </div>
-                        <div class="bg-gray-800 p-4 rounded border border-gray-700 text-center">
-                            <p class="text-xs text-gray-400 uppercase tracking-wide">Risparmio</p>
-                            <p class="text-xl font-bold text-green-400 mt-1" id="estSavings">-- %</p>
-                        </div>
-                        <div class="bg-gray-800 p-4 rounded border border-gray-700 text-center relative group">
-                            <p class="text-xs text-gray-400 uppercase tracking-wide">Tempo Mac</p>
+                        <div class="bg-gray-800 p-4 rounded border border-gray-700 text-center relative group flex flex-col justify-center">
+                            <p class="text-[11px] text-gray-400 uppercase tracking-wide">Tempo su Mac</p>
                             <p class="text-xl font-bold text-yellow-400 mt-1" id="estTime">-- min</p>
-                        </div>
-                        <div class="bg-gray-800 p-4 rounded border border-gray-700 text-center">
-                            <p class="text-xs text-gray-400 uppercase tracking-wide">Codec</p>
-                            <p class="text-xl font-bold text-blue-400 mt-1" id="estCodec">--</p>
                         </div>
                     </div>
                 </div>
@@ -215,16 +247,17 @@
     </div>
 
     <script>
+        // Lo stato usa CQ (Constant Quality scale 0-100) per VideoToolbox
         const state = {
-            fileLoaded: false, originalSizeMB: 0, durationSec: 0, width: 0, height: 0,
-            rf: 22, hardware: 'mac_hw_10', chip: 'base', ram: '16gb', target: 'nas',
-            audioStrategy: 'passthrough_aac', interlaced: false, denoise: 'off', colorSpace: 'auto'
+            fileLoaded: false, originalSizeMB: 0, durationSec: 0, pixels: 2073600, fps: 30,
+            cq: 75, hardware: 'mac_hw_10', chip: 'base', ram: '16gb', target: 'social',
+            audioStrategy: 'social_aac', denoise: 'off', colorSpace: 'bt709',
+            container: 'av_mp4', keepMetadata: true, webOptimized: false, alignAV: true
         };
 
         const fileInput = document.getElementById('fileInput');
         const downloadBtn = document.getElementById('downloadBtn');
-        const rfSlider = document.getElementById('rfSlider');
-        const socialAlert = document.getElementById('socialAlert');
+        const cqSlider = document.getElementById('cqSlider');
 
         function formatBytes(bytes, decimals = 2) {
             if (bytes === 0) return '0 Bytes';
@@ -233,13 +266,14 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
         }
 
-        // 1. Caricamento e Smart Detection
+        // 1. Caricamento File 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
 
             document.getElementById('dropText').classList.add('hidden');
             document.getElementById('fileData').classList.remove('hidden');
+            
             document.getElementById('fileName').textContent = file.name;
             state.originalSizeMB = file.size / (1024 * 1024);
             document.getElementById('fileSize').textContent = formatBytes(file.size);
@@ -248,203 +282,185 @@
             const tempVideo = document.createElement('video');
             
             tempVideo.addEventListener('loadedmetadata', function() {
-                state.durationSec = tempVideo.duration;
-                state.width = tempVideo.videoWidth;
-                state.height = tempVideo.videoHeight;
+                state.durationSec = Math.floor(tempVideo.duration);
+                state.pixels = tempVideo.videoWidth * tempVideo.videoHeight;
                 
-                document.getElementById('fileDuration').textContent = `${Math.floor(state.durationSec / 60)}m ${Math.floor(state.durationSec % 60)}s`;
-                document.getElementById('fileRes').textContent = `${state.width}x${state.height}`;
+                document.getElementById('fileDuration').textContent = `${Math.floor(state.durationSec / 60)}m ${state.durationSec % 60}s`;
+                document.getElementById('fileRes').textContent = `${tempVideo.videoWidth}x${tempVideo.videoHeight}`;
 
-                // --- SMART SOCIAL DETECTION ---
-                const ratio = state.width / state.height;
-                if (ratio <= 1.05) {
-                    state.target = 'social';
-                    document.getElementById('targetSelect').value = 'social';
-                    
-                    state.colorSpace = 'bt709'; 
-                    document.getElementById('colorSpaceSelect').value = 'bt709';
-                    
-                    state.audioStrategy = 'social_aac'; 
-                    document.getElementById('audioStrategy').value = 'social_aac';
-                    
-                    state.rf = 17; // RF 17 per resistere alla compressione
-                    rfSlider.value = 17;
-                    document.getElementById('rfValueLabel').textContent = `RF 17`;
-                    
-                    socialAlert.classList.remove('hidden');
-                } else {
-                    socialAlert.classList.add('hidden');
-                    // Reset se era attivo prima
-                    if(state.target === 'social') {
-                        document.getElementById('targetSelect').value = 'nas';
-                        state.target = 'nas';
-                        state.rf = 22;
-                        rfSlider.value = 22;
-                        document.getElementById('rfValueLabel').textContent = `RF 22`;
-                    }
-                }
-
-                state.fileLoaded = true;
-                URL.revokeObjectURL(videoURL); 
-                downloadBtn.disabled = false;
-                downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                updateEstimates();
+                // Popoliamo il fallback per sincronia visiva
+                document.getElementById('calcDuration').value = state.durationSec;
+                
+                sbloccaApp();
+                URL.revokeObjectURL(videoURL);
             });
+
+            tempVideo.addEventListener('error', function() {
+                // Il browser non lo legge (es. ProRes). Sblocchiamo comunque l'app
+                document.getElementById('fileDuration').textContent = "Ignorato (Dati manuali)";
+                document.getElementById('fileRes').textContent = "Ignorato (Dati manuali)";
+                sbloccaApp();
+                URL.revokeObjectURL(videoURL);
+            });
+
             tempVideo.src = videoURL;
         });
 
-        // 2. Event Listeners UI
+        function sbloccaApp() {
+            state.fileLoaded = true;
+            downloadBtn.disabled = false;
+            downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            updateEstimates();
+        }
+
+        // Listener Pannello Strutturale
+        document.getElementById('containerSelect').addEventListener('change', (e) => { state.container = e.target.value; });
+        document.getElementById('keepMetadata').addEventListener('change', (e) => { state.keepMetadata = e.target.checked; });
+        document.getElementById('webOptimized').addEventListener('change', (e) => { state.webOptimized = e.target.checked; });
+        document.getElementById('alignAV').addEventListener('change', (e) => { state.alignAV = e.target.checked; });
+
+        // Listener Calcolatore Manuale
+        document.getElementById('calcDuration').addEventListener('input', function(e) {
+            state.durationSec = parseFloat(e.target.value) || 1;
+            updateEstimates();
+        });
+        document.getElementById('calcRes').addEventListener('change', function(e) {
+            state.pixels = parseInt(e.target.value);
+            updateEstimates();
+        });
+        document.getElementById('calcFps').addEventListener('input', function(e) {
+            state.fps = parseFloat(e.target.value) || 30;
+            updateEstimates();
+        });
+
+        // Config Mac
         document.getElementById('hardwareSelect').addEventListener('change', (e) => { state.hardware = e.target.value; updateEstimates(); });
         document.getElementById('chipSelect').addEventListener('change', (e) => { state.chip = e.target.value; updateEstimates(); });
         document.getElementById('ramSelect').addEventListener('change', (e) => { state.ram = e.target.value; updateEstimates(); });
         
         document.getElementById('targetSelect').addEventListener('change', (e) => { 
             state.target = e.target.value;
-            socialAlert.classList.add('hidden'); // Nascondiamo l'alert se l'utente cambia manualmente
-            
-            if(state.target === 'nas') rfSlider.value = 22;
-            if(state.target === 'archive') rfSlider.value = 26;
-            if(state.target === 'editing') rfSlider.value = 18;
+            if(state.target === 'editing') { 
+                cqSlider.value = 95; state.cq = 95; 
+                document.getElementById('colorSpaceSelect').value = 'auto'; state.colorSpace = 'auto';
+            }
             if(state.target === 'social') {
-                rfSlider.value = 17;
-                state.rf = 17;
-                document.getElementById('colorSpaceSelect').value = 'bt709';
-                state.colorSpace = 'bt709';
-                document.getElementById('audioStrategy').value = 'social_aac';
-                state.audioStrategy = 'social_aac';
+                cqSlider.value = 75; state.cq = 75;
+                document.getElementById('colorSpaceSelect').value = 'bt709'; state.colorSpace = 'bt709';
+                document.getElementById('audioStrategy').value = 'social_aac'; state.audioStrategy = 'social_aac';
             }
             updateEstimates(); 
         });
         
-        rfSlider.addEventListener('input', (e) => {
-            state.rf = parseInt(e.target.value);
-            document.getElementById('rfValueLabel').textContent = `RF ${state.rf}`;
+        cqSlider.addEventListener('input', (e) => {
+            state.cq = parseInt(e.target.value);
             updateEstimates();
         });
 
-        document.getElementById('audioStrategy').addEventListener('change', (e) => { state.audioStrategy = e.target.value; });
-        document.getElementById('interlacedToggle').addEventListener('change', (e) => { state.interlaced = e.target.checked; updateEstimates(); });
+        document.getElementById('audioStrategy').addEventListener('change', (e) => { state.audioStrategy = e.target.value; updateEstimates(); });
         document.getElementById('denoiseSelect').addEventListener('change', (e) => { state.denoise = e.target.value; updateEstimates(); });
         document.getElementById('colorSpaceSelect').addEventListener('change', (e) => { state.colorSpace = e.target.value; });
 
-        // 3. Stime
+        // 3. Stime Matematiche (Curva CQ VideoToolbox)
         function updateEstimates() {
-            if (!state.fileLoaded) return;
-            state.rf = parseInt(rfSlider.value);
-            document.getElementById('rfValueLabel').textContent = `RF ${state.rf}`;
-
-            let compressionFactor = 0.80 - ((state.rf - 16) * 0.05);
-            if (compressionFactor < 0.05) compressionFactor = 0.05;
+            if (!state.fileLoaded && state.durationSec === 0) return;
             
-            if(state.denoise === 'light') compressionFactor *= 0.90; 
-            if(state.denoise === 'strong') compressionFactor *= 0.75; 
+            document.getElementById('cqValueLabel').textContent = `CQ ${state.cq}`;
 
-            const estimatedMB = state.originalSizeMB * compressionFactor;
-            document.getElementById('estSize').textContent = estimatedMB > 1000 ? `${(estimatedMB/1024).toFixed(2)} GB` : `${estimatedMB.toFixed(0)} MB`;
-            document.getElementById('estSavings').textContent = `- ${(100 - (compressionFactor * 100)).toFixed(0)} %`;
+            // Formula Curva VideoToolbox: CQ 50 = ~2Mbps(1080p), CQ 75 = ~15Mbps, CQ 90 = ~50Mbps
+            let baseVideoBitrateMbps = (Math.pow(1.085, state.cq - 50) * 2.0) * (state.pixels / 2073600);
 
-            const is4k = state.width > 1920 || state.height > 1920;
-            const totalFrames = state.durationSec * 30; 
+            let audioBitrateMbps = (state.audioStrategy === 'social_aac') ? 0.128 : 0.6;
+            let totalBitrateMbps = baseVideoBitrateMbps + audioBitrateMbps;
             
-            let baseFps = is4k ? 90 : 220; 
-            if (state.chip === 'pro') baseFps *= 1.4;
-            if (state.chip === 'max') baseFps *= 2.5; 
-            if (state.ram === '8gb' && is4k) baseFps *= 0.75; 
-            if (state.hardware === 'mac_sw') baseFps *= 0.15; 
+            if(state.denoise === 'light') totalBitrateMbps *= 0.85; 
+            if(state.denoise === 'strong') totalBitrateMbps *= 0.70; 
 
-            let hwFps = baseFps;
-            if(state.interlaced) hwFps *= 0.6;
+            // Calcolo BPP (Bits Per Pixel)
+            // (Bitrate in bits) / (Pixels * FPS)
+            const bpp = (baseVideoBitrateMbps * 1000000) / (state.pixels * state.fps);
+            document.getElementById('estBPP').textContent = bpp.toFixed(3);
+            
+            const bppLabel = document.getElementById('bppLabel');
+            if (bpp < 0.05) { bppLabel.textContent = "Qualità Povera / Web"; bppLabel.className = "text-[10px] uppercase mt-1 text-red-500"; }
+            else if (bpp >= 0.05 && bpp < 0.15) { bppLabel.textContent = "Standard / Feed"; bppLabel.className = "text-[10px] uppercase mt-1 text-yellow-500"; }
+            else if (bpp >= 0.15 && bpp < 0.35) { bppLabel.textContent = "Ottimo / Master"; bppLabel.className = "text-[10px] uppercase mt-1 text-green-500"; }
+            else { bppLabel.textContent = "Trasparenza Assoluta"; bppLabel.className = "text-[10px] uppercase mt-1 text-blue-500"; }
+
+            // Stima MB
+            const estimatedMB = (totalBitrateMbps * state.durationSec) / 8;
+            const minSize = estimatedMB * 0.5; 
+            const maxSize = estimatedMB * 1.5;
+
+            let sizeText = (maxSize > 1000) ? 
+                `${(minSize/1024).toFixed(1)} - ${(maxSize/1024).toFixed(2)} GB` : 
+                `${minSize.toFixed(0)} - ${maxSize.toFixed(0)} MB`;
+            document.getElementById('estSize').textContent = sizeText;
+            document.getElementById('estBitrate').textContent = `~ ${totalBitrateMbps.toFixed(1)} Mbps`;
+
+            // Tempistiche Mac
+            const is4k = state.pixels > 2100000;
+            const totalFrames = state.durationSec * state.fps; 
+            let hwFps = is4k ? 90 : 220; 
+            if (state.chip === 'pro') hwFps *= 1.4;
+            if (state.ram === '8gb' && is4k) hwFps *= 0.75; 
             if(state.denoise === 'light') hwFps *= 0.4;
             if(state.denoise === 'strong') hwFps *= 0.15;
 
             const timeSeconds = totalFrames / hwFps;
-            document.getElementById('estTime').textContent = `~ ${Math.ceil(timeSeconds / 60)} min`;
-
-            let encoderName = state.hardware.includes('10') ? 'HW 10-bit' : state.hardware.includes('hw') ? 'HW 8-bit' : 'x265 CPU';
-            document.getElementById('estCodec').textContent = encoderName;
-
-            const alertBox = document.getElementById('qualityAlert');
-            if (state.target === 'social') {
-                alertBox.className = "mb-6 p-3 rounded-md text-sm flex items-center bg-purple-900/30 text-purple-400 border border-purple-800";
-                alertBox.innerHTML = "🎯 <b>Ottimizzazione Social attiva:</b> Il file è preparato per mantenere nitidezza dopo la ricompressione del server web.";
-            } else if (state.rf > 26 && !is4k) {
-                alertBox.className = "mb-6 p-3 rounded-md text-sm flex items-center bg-red-900/30 text-red-400 border border-red-800";
-                alertBox.innerHTML = "⚠️ <b>Qualità a rischio:</b> Valori RF elevati creano artefatti su gradienti e dettagli fini.";
-            } else if (state.rf < 19) {
-                alertBox.className = "mb-6 p-3 rounded-md text-sm flex items-center bg-yellow-900/30 text-yellow-400 border border-yellow-800";
-                alertBox.innerHTML = "⚠️ <b>File Enorme:</b> A questi valori non otterrai miglioramenti visivi reali rispetto a RF 22.";
-            } else {
-                alertBox.className = "mb-6 p-3 rounded-md text-sm flex items-center bg-green-900/30 text-green-400 border border-green-800";
-                alertBox.innerHTML = "✅ <b>Bilanciamento ottimale:</b> Dimensione compatta e trasparenza visiva ideale.";
-            }
+            document.getElementById('estTime').textContent = (timeSeconds < 60) ? `~ ${Math.ceil(timeSeconds)} sec` : `~ ${Math.ceil(timeSeconds / 60)} min`;
         }
 
-        // 4. Compilazione JSON
+        // 4. Generazione JSON
         downloadBtn.addEventListener('click', () => {
-            if (!state.fileLoaded) return;
+            if (!state.fileLoaded && state.durationSec === 0) return;
 
-            let hbEncoder = "x265";
-            if (state.hardware === 'mac_hw_10') hbEncoder = "vt_h265_10bit";
-            if (state.hardware === 'mac_hw_8') hbEncoder = "vt_h265";
-
+            const hbEncoder = (state.hardware === 'mac_hw_10') ? "vt_h265_10bit" : "vt_h265";
             const audioTracks = [];
             
             if (state.audioStrategy === 'social_aac') {
-                audioTracks.push({
-                    "AudioEncoder": "ca_aac", 
-                    "AudioMixdown": "stereo",
-                    "AudioBitrate": 128
-                });
+                audioTracks.push({ "AudioEncoder": "ca_aac", "AudioMixdown": "stereo", "AudioBitrate": 128 });
             } else {
-                audioTracks.push({
-                    "AudioEncoder": "copy", 
-                    "AudioMixdown": "auto",
-                    "AudioTrackQualityEnable": false,
-                    "AudioTrackDRCEnable": false
-                });
-
+                audioTracks.push({ "AudioEncoder": "copy", "AudioMixdown": "auto", "AudioTrackQualityEnable": false, "AudioTrackDRCEnable": false });
                 if (state.audioStrategy === 'passthrough_aac') {
-                    audioTracks.push({
-                        "AudioEncoder": "ca_aac", 
-                        "AudioMixdown": "stereo",
-                        "AudioBitrate": 128
-                    });
+                    audioTracks.push({ "AudioEncoder": "ca_aac", "AudioMixdown": "stereo", "AudioBitrate": 128 });
                 }
             }
-
-            let deinterlaceStr = "off";
-            if (state.interlaced) deinterlaceStr = "decomb";
 
             let denoiseStr = "off";
             let denoiseTune = "none";
             if (state.denoise === 'light') { denoiseStr = "nlmeans"; denoiseTune = "light"; }
             if (state.denoise === 'strong') { denoiseStr = "nlmeans"; denoiseTune = "strong"; }
             
-            // Imposta MP4 per i social, altrimenti MKV
-            const fileContainer = state.target === 'social' ? "av_mp4" : "av_mkv";
-
             const presetJSON = {
                 "PresetList": [
                     {
-                        "PresetName": `WebSetup Mac (${hbEncoder}) RF${state.rf}`,
-                        "Description": "Ottimizzazione automatizzata generata per architetture Apple Silicon.",
-                        "Container": fileContainer,
+                        "PresetName": `WebSetup Mac (${hbEncoder}) CQ${state.cq}`,
+                        "Description": "Profilo Analitico calibrato per Apple Silicon VideoToolbox.",
+                        "Container": state.container,
                         "VideoEncoder": hbEncoder,
+                        
+                        // INIEZIONE CORRETTA CQ VIDEOTOOLBOX
                         "VideoQualityType": 2, 
-                        "VideoQualitySlider": state.rf,
+                        "VideoQualitySlider": state.cq,
+                        
                         "VideoFramerate": "auto",
                         "VideoFramerateMode": "vfr", 
-                        "VideoPreset": state.hardware.includes('sw') ? "slow" : "speed",
+                        "VideoPreset": "quality", 
+                        
                         "PictureAutoCrop": true,
                         "PictureKeepRatio": true,
-                        
-                        "PictureDeinterlaceFilter": deinterlaceStr,
+                        "PictureDeinterlaceFilter": "off",
                         "PictureDetelecineFilter": "off",
                         "PictureDenoiseFilter": denoiseStr,
                         "PictureDenoiseTune": denoiseTune,
                         "PictureColorspace": state.colorSpace === 'auto' ? "auto" : state.colorSpace,
                         "PictureGrayscale": false,
                         
+                        "Mp4HttpOptimize": state.webOptimized,
+                        "AlignAVStart": state.alignAV,
+                        "MetadataPassthrough": state.keepMetadata,
+
                         "AudioList": audioTracks
                     }
                 ],
@@ -456,7 +472,7 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(presetJSON, null, 4));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", `HandBrake_${state.target.toUpperCase()}_RF${state.rf}.json`);
+            downloadAnchorNode.setAttribute("download", `HandBrake_VT_CQ${state.cq}.json`);
             document.body.appendChild(downloadAnchorNode); 
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
